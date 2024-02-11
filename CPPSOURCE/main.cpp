@@ -1,3 +1,10 @@
+/*
+
+    Testing ideas for code generation.
+    spit out assembler source for a working executable file.
+    
+*/
+
 #include <cstdio>
 #include <cstdint>
 #include <cstdlib>
@@ -21,17 +28,26 @@ const wchar_t *widen(const std::string &narrow, std::wstring &wide)
 
     return wide.c_str();
 }
-
-int exec_fasm(const char *sourcefile, const char *outfile)
+int exec_program(int argc, const char *argv[])
 {
+    if (argc < 1)
+    {
+        fprintf(stderr, "program filename must be supplied\n");
+        return -1;
+    }
+    std::string app = argv[0];
+    std::string arg;
+    for (int i = 1; i < argc; i++)
+    {
+        arg = arg + std::string(argv[i]) + std::string(" ");
+    }
+    // fprintf(stderr,"program=%s\n",app.c_str());
+    // fprintf(stderr,"args=%s\n",arg.c_str());
     STARTUPINFOW si;
     PROCESS_INFORMATION pi;
     ZeroMemory(&si, sizeof(si));
     si.cb = sizeof(si);
     ZeroMemory(&pi, sizeof(pi));
-    std::string app("..\\fasm.exe");
-    std::string arg;
-    arg=arg+std::string(sourcefile)+std::string(" ")+std::string(outfile);
     std::wstring app_w;
     widen(app, app_w);
 
@@ -54,7 +70,7 @@ int exec_fasm(const char *sourcefile, const char *outfile)
                         &pi))
     {
         fprintf(stderr, "Error %d\n", GetLastError());
-        return 1;
+        return -2;
     }
     WaitForSingleObject(pi.hProcess, INFINITE);
     CloseHandle(pi.hProcess);
@@ -62,45 +78,66 @@ int exec_fasm(const char *sourcefile, const char *outfile)
     return 0;
 }
 
-void emit_header(FILE *asmfile)
+void emit_program_header(FILE *asmfile)
 {
-    fprintf(asmfile, "%s\n", "format pe64 console");
-    fprintf(asmfile, "%s\n", "include 'win64ax.inc'");
+    fprintf(asmfile, "%s\n", "format pe console");
+    fprintf(asmfile, "%s\n", "include 'win32ax.inc'");
     fprintf(asmfile, "%s\n", "entry main");
 }
-void emit_code_section(FILE *asmfile)
+void emit_code_section_header(FILE *asmfile)
 {
-    fprintf(asmfile,"%s\n","section '.txt' code executable readable");
-    fprintf(asmfile,"%s\n","main:");
-    fprintf(asmfile,"%s\n","mov rax,0");
-    fprintf(asmfile,"%s\n","invoke ExitProcess");
+    fprintf(asmfile, "%s\n", "\nsection '.text' code executable readable");
 }
-void emit_data_section(FILE *asmfile)
+void emit_data_section_header(FILE *asmfile)
 {
-    fprintf(asmfile,"%s\n","section '.data' writeable readable");  
+    fprintf(asmfile, "%s\n", "\nsection '.data' writeable readable");
 }
-void emit_footer(FILE *asmfile)
+void emit_import_section(FILE *asmfile)
 {
-    fprintf(asmfile,"%s\n", "section '.imports' import data readable");
-    fprintf(asmfile, "%s\n", "library kernel32,'kernel32.dll', \\");
+    fprintf(asmfile, "%s\n", "\nsection '.imports' import data readable");
+    fprintf(asmfile, "%s\n", "\nlibrary kernel32,'kernel32.dll', \\");
     fprintf(asmfile, "%s\n", "\tmsvcrt,'msvcrt.dll'");
-    fprintf(asmfile, "%s\n", "import kernel32,\\");
+    fprintf(asmfile, "%s\n", "\nimport kernel32,\\");
     fprintf(asmfile, "%s\n", "\tExitProcess,'ExitProcess'");
-    fprintf(asmfile, "%s\n", "import msvcrt,\\");
+    fprintf(asmfile, "%s\n", "\nimport msvcrt,\\");
     fprintf(asmfile, "%s\n", "\tprintf,'printf',\\");
     fprintf(asmfile, "%s\n", "\tsystem,'system',\\");
-    fprintf(asmfile, "%s\n", "\tgetchar,'getchar'");
+    fprintf(asmfile, "%s\n", "\tgetchar,'getchar',\\");
+    fprintf(asmfile, "%s\n", "\tputchar,'putchar',\\");
+    fprintf(asmfile, "%s\n", "\tputs,'puts',\\");
+    fprintf(asmfile, "%s\n", "\tfopen,'fopen',\\");
+    fprintf(asmfile, "%s\n", "\tfclose,'fclose',\\");
+    fprintf(asmfile, "%s\n", "\tfprintf,'fprintf',\\");
+    fprintf(asmfile, "%s\n", "\tfread,'fread',\\");
+    fprintf(asmfile, "%s\n", "\tfwrite,'fwrite',\\");
+    fprintf(asmfile, "%s\n", "\tfseek,'fseek',\\");
+    fprintf(asmfile, "%s\n", "\tftell,'ftell',\\");
+    fprintf(asmfile, "%s\n", "\tmalloc,'malloc',\\");
+    fprintf(asmfile, "%s\n", "\tfree,'free'\\");
+}
+void emit_asm(FILE *asmfile, const char *sourcecode)
+{
+    fprintf(asmfile, "%s\n", sourcecode);
 }
 int main(int argc, char *argv[])
 {
 
-    FILE *asmfile=fopen("main.asm","w");
-    emit_header(asmfile);
-    emit_code_section(asmfile);
-    emit_footer(asmfile);
+    FILE *asmfile = fopen("main.asm", "w");
+    emit_program_header(asmfile);
+
+    emit_code_section_header(asmfile);
+    emit_asm(asmfile, "main:");
+    emit_asm(asmfile, "\tmov eax,0");
+    emit_asm(asmfile, "\tinvoke ExitProcess");
+
+    emit_import_section(asmfile);
     fclose(asmfile);
 
-    exec_fasm("main.asm","main.exe");
-    
+    const char *args[]{
+        "..\\fasm.exe",
+        "main.asm",
+        "main.exe"};
+    exec_program(3, args);
+
     return 0;
 }
