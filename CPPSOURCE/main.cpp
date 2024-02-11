@@ -2,7 +2,7 @@
 
     Testing ideas for code generation.
     spit out assembler source for a working executable file.
-    
+
 */
 
 #include <cstdio>
@@ -77,48 +77,48 @@ int exec_program(int argc, const char *argv[])
     CloseHandle(pi.hThread);
     return 0;
 }
-
-void emit_program_header(FILE *asmfile)
-{
-    fprintf(asmfile, "%s\n", "format pe console");
-    fprintf(asmfile, "%s\n", "include 'win32ax.inc'");
-    fprintf(asmfile, "%s\n", "entry main");
-}
-void emit_code_section_header(FILE *asmfile)
-{
-    fprintf(asmfile, "%s\n", "\nsection '.text' code executable readable");
-}
-void emit_data_section_header(FILE *asmfile)
-{
-    fprintf(asmfile, "%s\n", "\nsection '.data' writeable readable");
-}
-void emit_import_section(FILE *asmfile)
-{
-    fprintf(asmfile, "%s\n", "\nsection '.imports' import data readable");
-    fprintf(asmfile, "%s\n", "\nlibrary kernel32,'kernel32.dll', \\");
-    fprintf(asmfile, "%s\n", "\tmsvcrt,'msvcrt.dll'");
-    fprintf(asmfile, "%s\n", "\nimport kernel32,\\");
-    fprintf(asmfile, "%s\n", "\tExitProcess,'ExitProcess'");
-    fprintf(asmfile, "%s\n", "\nimport msvcrt,\\");
-    fprintf(asmfile, "%s\n", "\tprintf,'printf',\\");
-    fprintf(asmfile, "%s\n", "\tsystem,'system',\\");
-    fprintf(asmfile, "%s\n", "\tgetchar,'getchar',\\");
-    fprintf(asmfile, "%s\n", "\tputchar,'putchar',\\");
-    fprintf(asmfile, "%s\n", "\tputs,'puts',\\");
-    fprintf(asmfile, "%s\n", "\tfopen,'fopen',\\");
-    fprintf(asmfile, "%s\n", "\tfclose,'fclose',\\");
-    fprintf(asmfile, "%s\n", "\tfprintf,'fprintf',\\");
-    fprintf(asmfile, "%s\n", "\tfread,'fread',\\");
-    fprintf(asmfile, "%s\n", "\tfwrite,'fwrite',\\");
-    fprintf(asmfile, "%s\n", "\tfseek,'fseek',\\");
-    fprintf(asmfile, "%s\n", "\tftell,'ftell',\\");
-    fprintf(asmfile, "%s\n", "\tmalloc,'malloc',\\");
-    fprintf(asmfile, "%s\n", "\tfree,'free'\\");
-}
 void emit_asm(FILE *asmfile, const char *sourcecode)
 {
     fprintf(asmfile, "%s\n", sourcecode);
 }
+void emit_program_header(FILE *asmfile)
+{
+    emit_asm(asmfile, "format pe console");
+    emit_asm(asmfile, "include 'win32ax.inc'");
+    emit_asm(asmfile, "entry main");
+}
+void emit_code_section_header(FILE *asmfile)
+{
+    emit_asm(asmfile, "\nsection '.text' code executable readable");
+}
+void emit_data_section_header(FILE *asmfile)
+{
+    emit_asm(asmfile, "\nsection '.data' writeable readable");
+}
+void emit_import_section(FILE *asmfile)
+{
+    emit_asm(asmfile, "\nsection '.imports' import data readable");
+    emit_asm(asmfile, "\nlibrary kernel32,'kernel32.dll', \\");
+    emit_asm(asmfile, "\tmsvcrt,'msvcrt.dll'");
+    emit_asm(asmfile, "\nimport kernel32,\\");
+    emit_asm(asmfile, "\tExitProcess,'ExitProcess'");
+    emit_asm(asmfile, "\nimport msvcrt,\\");
+    emit_asm(asmfile, "\tprintf,'printf',\\");
+    emit_asm(asmfile, "\tsystem,'system',\\");
+    emit_asm(asmfile, "\tgetchar,'getchar',\\");
+    emit_asm(asmfile, "\tputchar,'putchar',\\");
+    emit_asm(asmfile, "\tputs,'puts',\\");
+    emit_asm(asmfile, "\tfopen,'fopen',\\");
+    emit_asm(asmfile, "\tfclose,'fclose',\\");
+    emit_asm(asmfile, "\tfprintf,'fprintf',\\");
+    emit_asm(asmfile, "\tfread,'fread',\\");
+    emit_asm(asmfile, "\tfwrite,'fwrite',\\");
+    emit_asm(asmfile, "\tfseek,'fseek',\\");
+    emit_asm(asmfile, "\tftell,'ftell',\\");
+    emit_asm(asmfile, "\tmalloc,'malloc',\\");
+    emit_asm(asmfile, "\tfree,'free'\\");
+}
+
 int main(int argc, char *argv[])
 {
 
