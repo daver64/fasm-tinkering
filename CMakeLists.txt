@@ -50,12 +50,18 @@ endif()
 if(MSVC)
 add_executable(dfrc
     CPPSOURCE/main.cpp
+    CPPSOURCE/codegen_pe32.cpp
+    CPPSOURCE/lexxer.cpp
+    CPPSOURCE/exec.cpp
 )
 endif(MSVC)
 
 if(UNIX)
 add_executable(dfrc
     CPPSOURCE/main.cpp
+    CPPSOURCE/codegen_elf32.cpp
+    CPPSOURCE/lexxer.cpp
+    CPPSOURCE/exec.cpp
 )
 endif(UNIX)
 
