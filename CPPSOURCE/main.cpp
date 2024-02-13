@@ -7,11 +7,19 @@
 
 #include "codegen.h"
 
+int build_test_program();
 
 //
 // TODO: accept parameters including source file to convert to assembler.
 // for now we just construct a simple working program by hand.
 int main(int argc, char *argv[])
+{
+
+
+    return 0;
+}
+
+int build_test_program()
 {
 
     FILE *asmfile = fopen("main.asm", "w");
