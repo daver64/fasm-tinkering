@@ -213,13 +213,13 @@ int lexx_consume_next_token(Token **tok)
 	}
 	else
 	{
-		printf("free last %p\n",(*tok));
+		//printf("free last %p\n",(*tok));
 		free( (*tok));
 		*tok=NULL;
 		return LEXX_OK;
 	}
 
-	printf("free token %p\n",removed_token);
+	//printf("free token %p\n",removed_token);
 	free(removed_token);
 	return LEXX_OK;
 }
@@ -407,14 +407,21 @@ Token *lexx(SourceFile *sourcefile)
 void lexx_dump(Token *token)
 {
 	if(!token)
+	{
+		fprintf(stderr,"invalid token %c\n",token->cvalue);
 		return;
+	}
+	else
+	{
+		fprintf(stderr,"lexx_dump:\n");
+	}
 	Token *tok_iter = token;
 	do
 	{
 		lexx_decode(tok_iter);
 		printf("\t <--tok=%p  ", tok_iter);
-		printf("tok->prev=%p  ", tok_iter->prev);
-		printf("tok->next=%p -->\n", tok_iter->next);
+		//printf("tok->prev=%p  ", tok_iter->prev);
+		//printf("tok->next=%p -->\n", tok_iter->next);
 
 		tok_iter = tok_iter->next;
 	} while (tok_iter != NULL);
@@ -484,19 +491,29 @@ SourceFile *open_sourcefile(const char *sourcefile)
 		if (sf)
 		{
 			sf->source = (char*)malloc(len + 1);
+			//fprintf(stderr,"size=%u\n",len+1);
 			if (sf)
 			{
 				long lread = fread(sf->source, 1, len, fp);
-				if (lread != len)
+				//if (lread != len)
 				{
-					free(sf->source);
-					free(sf);
-					sf = NULL;
+					//fprintf(stderr,"sizes %u %u\n",lread,len);
+				//	free(sf->source);
+				//	free(sf);
+				//	sf = NULL;
 				}
 				sf->source_end = sf->source + lread;
 			}
 		}
+		else
+		{
+			fprintf(stderr,"failed to allocated SoureFile structure memory\n");
+		}
 		fclose(fp);
+	}
+	else
+	{
+		fprintf(stderr,"failed to open %s\n",sourcefile);
 	}
 	return sf;
 }
