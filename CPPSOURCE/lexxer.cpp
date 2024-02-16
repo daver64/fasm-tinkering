@@ -419,7 +419,8 @@ void lexx_dump(Token *token)
 	do
 	{
 		lexx_decode(tok_iter);
-		printf("\t <--tok=%p  ", tok_iter);
+		putchar('\n');
+		//printf("\t <--tok=%p  ", tok_iter);
 		//printf("tok->prev=%p  ", tok_iter->prev);
 		//printf("tok->next=%p -->\n", tok_iter->next);
 
