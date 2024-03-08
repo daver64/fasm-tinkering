@@ -10,6 +10,11 @@ KeywordEntry kwtable[] = {
 	{"while", LEXX_TOKEN_WHILE},
 	{"else", LEXX_TOKEN_ELSE},
 	{"struct", LEXX_TOKEN_STRUCT},
+	{"int", LEXX_TOKEN_INTEGER},
+	{"float",LEXX_TOKEN_FLOAT},
+	{"string",LEXX_TOKEN_STRING},
+	{"array",LEXX_TOKEN_ARRAY},
+	{"map",LEXX_TOKEN_MAP},
 	{NULL, 0}};
 
 int lexx_fetch_next_char()

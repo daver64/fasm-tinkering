@@ -73,6 +73,9 @@ void emit_import_section(FILE *asmfile);
 #define LEXX_TOKEN_TYPE_FLOAT (341)
 #define LEXX_TOKEN_TYPE_STRING (342)
 
+#define LEXX_TOKEN_ARRAY (343)
+#define LEXX_TOKEN_MAP (344)
+
 #define LEXX_TOKEN_TABLE_SIZE (42)
 
 
