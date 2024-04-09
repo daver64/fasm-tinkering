@@ -19,11 +19,12 @@ int main(int argc, char *argv[])
     //fprintf(stderr,"lexx_scan\n");
     Token *lexx_root = lexx_scan(sf);
     //fprintf(stderr,"lexx_dump\n");
-    lexx_dump(lexx_root);
+    //lexx_dump(lexx_root);
     //fprintf(stderr,"scanning...\n");
     do {
         lexx_consume_next_token(&lexx_root);
         //fprintf(stdout,"\n\tToken Consumed lexx_ptr=%p\n",lexx_root);
+        lexx_decode(lexx_root);
         //lexx_dump(lexx_root);
     } while(lexx_root);
     lexx_free_tokens(lexx_root);
