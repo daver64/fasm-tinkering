@@ -1,3 +1,3 @@
-call vcvars64
 set path=%path%;%cd%
-set include=%cd%\include
+set include=%include%;%cd%\include
+call vcvars64
