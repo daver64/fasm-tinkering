@@ -14,20 +14,13 @@ int build_test_program();
 // for now we just construct a simple working program by hand.
 int main(int argc, char *argv[])
 {
-    //fprintf(stderr,"dfrc ver 0.1\n");
     SourceFile *sf=open_sourcefile("..\\foo.nc");
-    //fprintf(stderr,"lexx_scan\n");
-    Token *lexx_root = lexx_scan(sf);
-    //fprintf(stderr,"lexx_dump\n");
-    //lexx_dump(lexx_root);
-    //fprintf(stderr,"scanning...\n");
+    Token *current_token = lexx_scan(sf);
     do {
-        lexx_consume_next_token(&lexx_root);
-        //fprintf(stdout,"\n\tToken Consumed lexx_ptr=%p\n",lexx_root);
-        lexx_decode(lexx_root);
-        //lexx_dump(lexx_root);
-    } while(lexx_root);
-    lexx_free_tokens(lexx_root);
+        lexx_decode(current_token);
+        lexx_consume_next_token(&current_token);
+    } while(current_token);
+    lexx_free_tokens(current_token);
     close_sourcefile(sf);
     return 0;
 }

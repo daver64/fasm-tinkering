@@ -1,6 +1,5 @@
 #include "codegen.h"
 
-
 char *look = NULL;
 char *end_of_source = NULL;
 char *start_of_source = NULL;
@@ -11,10 +10,11 @@ KeywordEntry kwtable[] = {
 	{"else", LEXX_TOKEN_ELSE},
 	{"struct", LEXX_TOKEN_STRUCT},
 	{"int", LEXX_TOKEN_INTEGER},
-	{"float",LEXX_TOKEN_FLOAT},
-	{"string",LEXX_TOKEN_STRING},
-	{"array",LEXX_TOKEN_ARRAY},
-	{"map",LEXX_TOKEN_MAP},
+	{"float", LEXX_TOKEN_FLOAT},
+	{"string", LEXX_TOKEN_STRING},
+	{"array", LEXX_TOKEN_ARRAY},
+	{"map", LEXX_TOKEN_MAP},
+	{"let", LEXX_TOKEN_LET},
 	{NULL, 0}};
 
 int lexx_fetch_next_char()
@@ -24,13 +24,11 @@ int lexx_fetch_next_char()
 		return LEXX_FINISHED;
 	return LEXX_OK;
 }
-
 int lexx_unfetch_char()
 {
 	look--;
 	return LEXX_OK;
 }
-
 int lexx_skipws()
 {
 	while (*look == ' ' || *look == '\t' || *look == '\n')
@@ -39,19 +37,25 @@ int lexx_skipws()
 	}
 	return LEXX_OK;
 }
-
 int lexx_isdigit(const char c)
 {
 	return (c >= '0' && c <= '9');
 }
-
+int lexx_isvalidforfloat(const char c)
+{
+	return (c >= '0' && c <= '9') || (c == '.') || (c == 'e');
+}
 int lexx_isalpha(const char c)
 {
 	return (toupper(c) >= 'A' && toupper(c) <= 'Z');
 }
+int lexx_isspace(const char c)
+{
+	return (*look == ' ' || *look == '\t' || *look == '\n');
+}
 int64_t lexx_read_integer()
 {
-	char *str = (char*)malloc(64);
+	char *str = (char *)malloc(64);
 	int i = 0;
 	do
 	{
@@ -65,9 +69,25 @@ int64_t lexx_read_integer()
 	free(str);
 	return result;
 }
+double_t lexx_read_float()
+{
+	char *str = (char *)malloc(64);
+	int i = 0;
+	do
+	{
+		str[i] = *look;
+		i++;
+		lexx_fetch_next_char();
+	} while (lexx_isvalidforfloat(*look) && i < 64);
+	str[i] = 0;
+	double_t result = 0;
+	sscanf(str, "%lf", &result);
+	free(str);
+	return result;
+}
 char *lexx_read_label()
 {
-	char *str = (char*)malloc(64);
+	char *str = (char *)malloc(64);
 	int i = 0;
 	do
 	{
@@ -196,8 +216,6 @@ int lexx_ismulop()
 
 	return LEXX_NOT_MULOP;
 }
-
-
 int lexx_consume_next_token(Token **tok)
 {
 	if (!tok)
@@ -218,13 +236,13 @@ int lexx_consume_next_token(Token **tok)
 	}
 	else
 	{
-		//printf("free last %p\n",(*tok));
-		free( (*tok));
-		*tok=NULL;
+		// printf("free last %p\n",(*tok));
+		free((*tok));
+		*tok = NULL;
 		return LEXX_OK;
 	}
 
-	//printf("free token %p\n",removed_token);
+	// printf("free token %p\n",removed_token);
 	free(removed_token);
 	return LEXX_OK;
 }
@@ -240,7 +258,6 @@ int lexx_iskeyword(char *str)
 
 	return LEXX_TOKEN_LABEL;
 }
-
 int lexx_istype(char *str)
 {
 	if (strcmp(str, "int") == 0)
@@ -294,10 +311,9 @@ Token *lexx_scan(SourceFile *sf)
 	} while (token->tokentype != LEXX_FINISHED && token->tokentype != LEXX_ERROR_UNKNOWN_ERROR && token->tokentype != LEXX_ERROR);
 	return lexx_root;
 }
-
 Token *lexx(SourceFile *sourcefile)
 {
-	Token *token = (Token*)malloc(sizeof(Token));
+	Token *token = (Token *)malloc(sizeof(Token));
 	memset(token, 0, sizeof(Token));
 
 	if (!sourcefile)
@@ -343,12 +359,17 @@ Token *lexx(SourceFile *sourcefile)
 	else if (lexx_isalpha(*look))
 	{
 		char *label = lexx_read_label();
+		// printf("check if keyword %s is label\n",label);
 		token->tokentype = lexx_iskeyword(label);
-		// if lexx_is_keyword() returns LABEL, then it might still be
-		// a var type, so we check for that . lexx_istype() returns
-		// LABEL if it's not a var type either.
+		// printf("tokentype=%d\n",token->tokentype);
+		//  if lexx_is_keyword() returns LABEL, then it might still be
+		//  a var type, so we check for that . lexx_istype() returns
+		//  LABEL if it's not a var type either.
 		if (token->tokentype == LEXX_TOKEN_LABEL)
+		{
+			// printf("checking if type\n");
 			token->tokentype = lexx_istype(label);
+		}
 		token->strvalue = label;
 		return token;
 	}
@@ -360,14 +381,14 @@ Token *lexx(SourceFile *sourcefile)
 		{
 			// empty string..
 			token->tokentype = LEXX_TOKEN_STRING;
-			token->strvalue = (char*)malloc(1);
+			token->strvalue = (char *)malloc(1);
 			token->strvalue[0] = '\0';
 			return token;
 		}
 		else
 		{
 			char *tmp_ptr = look;
-			char *str = (char*)malloc(1024);
+			char *str = (char *)malloc(1024);
 			int len = 0;
 			int lresult = LEXX_OK;
 			do
@@ -411,30 +432,30 @@ Token *lexx(SourceFile *sourcefile)
 }
 void lexx_dump(Token *token)
 {
-	if(!token)
+	if (!token)
 	{
-		fprintf(stderr,"invalid token %c\n",token->cvalue);
+		fprintf(stderr, "invalid token %c\n", token->cvalue);
 		return;
 	}
 	else
 	{
-		fprintf(stderr,"lexx_dump:\n");
+		fprintf(stderr, "lexx_dump:\n");
 	}
 	Token *tok_iter = token;
 	do
 	{
 		lexx_decode(tok_iter);
 		putchar('\n');
-		//printf("\t <--tok=%p  ", tok_iter);
-		//printf("tok->prev=%p  ", tok_iter->prev);
-		//printf("tok->next=%p -->\n", tok_iter->next);
+		// printf("\t <--tok=%p  ", tok_iter);
+		// printf("tok->prev=%p  ", tok_iter->prev);
+		// printf("tok->next=%p -->\n", tok_iter->next);
 
 		tok_iter = tok_iter->next;
 	} while (tok_iter != NULL);
 }
 void lexx_free_tokens(Token *lexx_root)
 {
-	if(!lexx_root)
+	if (!lexx_root)
 		return;
 	Token *lexx_ptr = lexx_root;
 	while (lexx_ptr->next != NULL)
@@ -493,33 +514,33 @@ SourceFile *open_sourcefile(const char *sourcefile)
 		fseek(fp, 0, SEEK_END);
 		long len = ftell(fp);
 		fseek(fp, 0, SEEK_SET);
-		sf = (SourceFile*)malloc(sizeof(SourceFile));
+		sf = (SourceFile *)malloc(sizeof(SourceFile));
 		if (sf)
 		{
-			sf->source = (char*)malloc(len + 1);
-			//fprintf(stderr,"size=%u\n",len+1);
+			sf->source = (char *)malloc(len + 1);
+			// fprintf(stderr,"size=%u\n",len+1);
 			if (sf)
 			{
 				long lread = fread(sf->source, 1, len, fp);
-				//if (lread != len)
+				// if (lread != len)
 				{
-					//fprintf(stderr,"sizes %u %u\n",lread,len);
-				//	free(sf->source);
-				//	free(sf);
-				//	sf = NULL;
+					// fprintf(stderr,"sizes %u %u\n",lread,len);
+					//	free(sf->source);
+					//	free(sf);
+					//	sf = NULL;
 				}
 				sf->source_end = sf->source + lread;
 			}
 		}
 		else
 		{
-			fprintf(stderr,"failed to allocated SoureFile structure memory\n");
+			fprintf(stderr, "failed to allocated SoureFile structure memory\n");
 		}
 		fclose(fp);
 	}
 	else
 	{
-		fprintf(stderr,"failed to open %s\n",sourcefile);
+		fprintf(stderr, "failed to open %s\n", sourcefile);
 	}
 	return sf;
 }
@@ -589,6 +610,10 @@ int lexx_decode(Token *token)
 		break;
 
 	case LEXX_TOKEN_STRUCT:
+		printf("KEYWORD %s", token->strvalue);
+		break;
+
+	case LEXX_TOKEN_LET:
 		printf("KEYWORD %s", token->strvalue);
 		break;
 
