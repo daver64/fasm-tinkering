@@ -68,7 +68,7 @@ void emit_import_section(FILE *asmfile);
 #define LEXX_TOKEN_PIPE (337)
 #define LEXX_TOKEN_UNDERSCORE (338)
 #define LEXX_TOKEN_SINGLEQUOTE (339)
-
+ 
 #define LEXX_TOKEN_TYPE_INT (340)
 #define LEXX_TOKEN_TYPE_FLOAT (341)
 #define LEXX_TOKEN_TYPE_STRING (342)

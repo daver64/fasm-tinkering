@@ -24,6 +24,9 @@ void emit_code_section_header(FILE *asmfile)
 void emit_data_section_header(FILE *asmfile)
 {
     emit_asm(asmfile, "\nsection '.data' writeable readable");
+    emit_asm(asmfile,"times 512 dd 0");
+    emit_asm(asmfile,"nstack: dd 0");
+    emit_asm(asmfile,"fmt_int: db '%d',0");
 }
 void emit_import_section(FILE *asmfile)
 {
