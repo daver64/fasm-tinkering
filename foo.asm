@@ -12,6 +12,10 @@ main:
 push ebp
 mov ebp,esp
 xor eax,eax
+xor edx,edx
+xor ecx,ecx
+xor ebx,ebx
+xor esi,esi
 mov edi,nstack
 mov eax,84
 sub edi,4
@@ -27,7 +31,6 @@ add edi,4
 mov eax,[edi]
 idiv ebx
 mov [edi],eax
-
 
 cinvoke printf, fmt_int,dword [edi]
 

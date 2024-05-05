@@ -4,4 +4,5 @@ EXAMPLES/OPENGL/opengl.exe
 EXAMPLES/WIN64/CONSOLE/console.exe
 bin/
 build/
-
+foo.asm
+foo.exe
