@@ -83,7 +83,6 @@ int main(int argc, char *argv[])
 
     fprintf(asmfile, "mov eax,0\n");
     fprintf(asmfile, "invoke ExitProcess,eax\n\n");
-
     emit_finalise_callframe(asmfile);
     lexx_free_tokens(current_token);
     close_sourcefile(sf);

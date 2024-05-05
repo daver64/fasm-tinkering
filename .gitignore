@@ -6,3 +6,5 @@ bin/
 build/
 foo.asm
 foo.exe
+foo.asm
+foo.exe
